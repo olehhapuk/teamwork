@@ -21,10 +21,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform gunHolder;
     [SerializeField] private Transform gunPivot;
 
+    [Header("References")]
+    [SerializeField] private AnimationController animationController;
+
     private Rigidbody2D _rb;
 
     private Vector2 _velocity;
     private int _moveDir;
+    private int _lookDir;
     private bool _isGrounded;
     private Vector2 _groundCheckPosition;
 
@@ -80,6 +84,7 @@ public class PlayerController : MonoBehaviour
             gun.transform.parent = gunHolder;
             gun.transform.localPosition = Vector2.zero;
             gun.transform.localRotation = Quaternion.identity;
+            CurrentGun.UpdateAmmoUI();
         }
         else
         {
@@ -89,16 +94,15 @@ public class PlayerController : MonoBehaviour
             gun.transform.parent = gunHolder;
             gun.transform.localPosition = Vector2.zero;
             gun.transform.localRotation = Quaternion.identity;
+            CurrentGun.UpdateAmmoUI();
         }
     }
 
     public void DropGun()
     {
-        if (CurrentGun != null)
-        {
-            Destroy(CurrentGun.gameObject);
-            CurrentGun = null;
-        }
+        CurrentGun.UpdateAmmoUI(0, 0);
+        Destroy(CurrentGun.gameObject);
+        CurrentGun = null;
     }
 
     private void RotateGun()
@@ -107,6 +111,11 @@ public class PlayerController : MonoBehaviour
         var myPosition = Camera.main.WorldToScreenPoint(gunPivot.position);
         var angle = Mathf.Atan2(mousePosition.y - myPosition.y, mousePosition.x - myPosition.x) * Mathf.Rad2Deg;
         gunPivot.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
+
+        if (angle < 90f && angle > -90f)
+            _lookDir = 1;
+        else
+            _lookDir = -1;
     }
 
     private void CheckCollisions()
@@ -115,15 +124,18 @@ public class PlayerController : MonoBehaviour
         _isGrounded = Physics2D.OverlapBox(_groundCheckPosition, groundCheckSize, 0, groundLayer);
     }
 
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = _isGrounded ? Color.red : Color.green;
-        Gizmos.DrawWireCube(_groundCheckPosition, groundCheckSize);
-    }
-
     private void FixedUpdate()
     {
         Move();
+        Flip();
+    }
+
+    private void Flip()
+    {
+        if (_lookDir == 1 && transform.eulerAngles.y != 0f)
+            transform.eulerAngles = new Vector3(0f, 0f, 0f);
+        else if (_lookDir == -1 && transform.eulerAngles.y != 180f)
+            transform.eulerAngles = new Vector3(0f, 180f, 0f);
     }
 
     private void Move()
@@ -139,6 +151,8 @@ public class PlayerController : MonoBehaviour
             {
                 _velocity.x = Mathf.Lerp(_velocity.x, 0, friction);
             }
+
+            animationController.SetVelocity(_moveDir);
         }
         else
         {

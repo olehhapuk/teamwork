@@ -41,3 +41,15 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Enemy
+    uniqueID: 4119757809
+    locked: 0
+  - name: MC
+    uniqueID: 1819558689
+    locked: 0
+  - name: Equipment
+    uniqueID: 3082741383
+    locked: 0
+  - name: Environment
+    uniqueID: 4141473277
+    locked: 0

@@ -5,11 +5,12 @@ using UnityEngine;
 
 public class GunController : MonoBehaviour, IInteractable
 {
+    public int CurrentAmmo => _currentAmmo;
+
     [SerializeField] private Transform muzzle;
     [SerializeField] private GameObject gunShotparticles;
     [SerializeField] private GameObject bulletPrefab;
-    [SerializeField] private LayerMask damagableLayer;
-
+    [SerializeField] private LayerMask damageableLayer;
 
     [Header("Parameters")]
     [SerializeField] private int maxAmmo = 10;
@@ -56,17 +57,17 @@ public class GunController : MonoBehaviour, IInteractable
         }
     }
 
-    private void OnDestroy()
-    {
-        ResetAmmoUI();
-    }
-
     private void ResetAmmoUI()
     {
         UIManager.instance.UpdateAmmo(0, 0);
     }
 
-    private void UpdateAmmoUI()
+    public void UpdateAmmoUI()
+    {
+        UIManager.instance.UpdateAmmo(_currentAmmo, _currentMagazines * maxAmmo);
+    }
+
+    public void UpdateAmmoUI(int currentAmmo, int currentMagazines)
     {
         UIManager.instance.UpdateAmmo(_currentAmmo, _currentMagazines * maxAmmo);
     }
@@ -81,7 +82,7 @@ public class GunController : MonoBehaviour, IInteractable
                 _currentAmmo--;
                 UpdateAmmoUI();
                 Instantiate(gunShotparticles, muzzle.position, muzzle.rotation);
-                var hit = Physics2D.Raycast(muzzle.position, muzzle.right, 100, damagableLayer);
+                var hit = Physics2D.Raycast(muzzle.position, muzzle.right, 100, damageableLayer);
 
                 if (hit.collider != null)
                 {
@@ -130,9 +131,7 @@ public class GunController : MonoBehaviour, IInteractable
     public void Interact()
     {
         _player.TakeGun(this);
-        UpdateAmmoUI();
     }
-
 
     public void ShowHelp()
     {

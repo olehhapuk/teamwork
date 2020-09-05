@@ -16,6 +16,7 @@ public class UIManager : MonoBehaviour
 
     public void UpdateAmmo(int currentAmmo, int maxAmmo)
     {
+        Debug.Log(currentAmmo);
         ammoText.text = "Ammo " + currentAmmo + '/' + maxAmmo;
     }
 
